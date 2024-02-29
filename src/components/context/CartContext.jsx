@@ -1,6 +1,6 @@
 import React from 'react';
 import { createContext, useState } from "react";
-import {ItemCount} from "../ItemCount/ItemCount";
+
 
 export const CartContext = createContext()
 export const CartContextProvider = ({children}) =>
