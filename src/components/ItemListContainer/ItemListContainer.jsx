@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import {getProducts, getProductsByCategory, } from '../../assets/asyncMock'
 import ItemList from '../ItemList/ItemList'
 import { useParams } from 'react-router-dom'
+import { collection, getDocs, where, query } from 'firebase/firestore'
+import { db } from '../../services/firebaseConfig'
 
 const ItemListContainer = ({greetingMessage}) => {
 
@@ -12,24 +14,41 @@ const ItemListContainer = ({greetingMessage}) => {
 const {category} = useParams()
 
 
+
 useEffect(() => {
-  const fetchProducts = async()=>{
-    try{
-      setLoading(true);
-      const result = category
-      ? await getProductsByCategory(category)
-      : await getProducts();
-      setProducts(result);}
+  setLoading(true)
+  const productsRef = category
+? query(collection(db, 'products'), where('category', '==', category))
+: collection(db, 'products')
 
-      catch(error){
-        console.error
-        ('Fetch fallido.', error);
-      } finally{
-        setLoading(false);
-      }
-    };
+getDocs(productsRef)
+.then(snapshot => {
+  const productsDeconstructed = snapshot.docs.map(doc => {
+    const data = doc.data()
+    return{id: doc.id, ...data}
 
-    fetchProducts();
+  })
+
+  setProducts(productsDeconstructed)
+
+}).finally(() => {
+  setLoading(false)
+})
+//  const fetchProducts = async () =>{
+//     try {
+//       setLoading(true);
+//       const result = category
+//       ? await getProductsByCategory(category)
+//       : await getProducts();
+//       setProducts(result);
+//     } catch(error){
+//       console.error("error en el fetch", error);
+//     } finally{
+//       setLoading(false);
+//     }
+//   }
+
+    // fetchProducts();
   }, [category])
 
   
